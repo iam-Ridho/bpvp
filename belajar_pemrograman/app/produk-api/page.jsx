@@ -1,0 +1,53 @@
+import dayjs from "dayjs";
+import "dayjs/locale/id.js";
+import { ambilProduk } from "@/lib/api";
+import { formatRupiah } from "@/lib/format";
+
+dayjs.locale("id");
+
+export const metadata = { title: "Produk dari API" }
+
+const KURS = 18200;
+
+export default async function HalamanProdukApi({searchParams}) {
+    const { q = ""} = await searchParams;
+    const { data, total, error } = await ambilProduk(q);
+
+    return (
+        <main className="mx-auto max-w-5xl p-6">
+            <h1 className="text-2xl font-bold">Produk dari API</h1>
+            <form className="mt-4 flex gap-2" action="/produk-api">
+                <label htmlFor="q" className="sr-only">Cari Produk</label>
+                <input id="q" name="q" defaultValue={q} placeholder="Cari, misalnya phone" className="flex-1 rounded-lg border px-3 py-2" type="text" />
+                <button className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white">Cari</button>
+            </form>
+
+            {error ? (
+                <div role="alert" className="mt-6 rounded-lg border border-red-300">
+                    <p className="font-semibold">Gagal Memuat Produk</p>
+                    <p className="text-sm">{error}. Periksa koneksi internet lalu muat ulang halaman</p>
+                </div>
+            ) : data.length === 0 ? (
+                <p className="mt-6 rounded-lg border border-dashed p-6 text-center text-slate-600">Tidak ada produk yang cocok dengan &quot;{q}&quot;</p>
+            ) : (
+                <>
+                    <p className="mt-4 text-sm text-slate-600">Menampilkan {data.length} dari {total} produk{q && ` untuk "${q}"`}</p>
+                    <ul className="mt-4 grid grid-cols-2 gap-4">
+                        {data.map((p) => (
+                            <li key={p.id} className="rounded-xl border p-4">
+                                <p className="text-xs uppercase text-slate-500">{p.category}</p>
+                                <h2 className="font-semibold">{p.title}</h2>
+                                <p className="mt-2 text-lg font-bold">{formatRupiah(p.price * KURS)}</p>
+                                <p className={p.stock < 10 ? "text-sm text-red-700" : "text-sm text-slate-600"} >Stok {p.stock}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+
+            <p className="mt-8 text-xs text-slate-500">
+                Diperbarui {dayjs().format("dddd, D MMMM YYYY HH:mm")}
+            </p>
+        </main>
+    );
+}
