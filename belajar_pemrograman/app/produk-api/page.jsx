@@ -39,6 +39,7 @@ export default async function HalamanProdukApi({searchParams}) {
                                 <h2 className="font-semibold">{p.title}</h2>
                                 <p className="mt-2 text-lg font-bold">{formatRupiah(p.price * KURS)}</p>
                                 <p className={p.stock < 10 ? "text-sm text-red-700" : "text-sm text-slate-600"} >Stok {p.stock}</p>
+                                <img src={p.thumbnail} alt="" />
                             </li>
                         ))}
                     </ul>
